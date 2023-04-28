@@ -31,9 +31,7 @@ const Timetable = ({
             return (
               <tr key={`${id}-row-${rowIndex}`}>
                 {row.map((cell, index) => {
-                  return cell === "" || index === 1 ? (
-                    <></>
-                  ) : (
+                  return cell === "" || index === 1 ? null : (
                     <th
                       key={`${id}-${rowIndex}-${index}`}
                       className={getClassName(
@@ -68,9 +66,7 @@ const Timetable = ({
                     classInSlot && classInSlot["EMPLOYEE NAME"];
                   return cell === "" ||
                     cellIndex === 1 ||
-                    (rowIndex > 0 && cell === "Lunch") ? (
-                    <></>
-                  ) : (
+                    (rowIndex > 0 && cell === "Lunch") ? null : (
                     <td
                       key={`${id}-${rowIndex}-${cellIndex}`}
                       className={`${getClassName(
@@ -104,9 +100,7 @@ const Timetable = ({
                             </div>
                           </div>
                         </div>
-                      ) : (
-                        <></>
-                      )}
+                      ) : null}
                     </td>
                   );
                 })}

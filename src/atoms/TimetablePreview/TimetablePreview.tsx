@@ -53,9 +53,7 @@ const TimetablePreview = ({ slots, id }: Props) => {
             return (
               <tr key={`${id}-row-${rowIndex}`}>
                 {row.map((cell, index) => {
-                  return cell === "" ? (
-                    <></>
-                  ) : (
+                  return cell === "" ? null : (
                     <th
                       key={`${id}-${rowIndex}-${index}`}
                       className={getClassName(
@@ -80,9 +78,7 @@ const TimetablePreview = ({ slots, id }: Props) => {
             return (
               <tr key={`${id}-row-${rowIndex}`}>
                 {row.map((cell, cellIndex) => {
-                  return cell === "" ? (
-                    <></>
-                  ) : (
+                  return cell === "" ? null : (
                     <td
                       key={`${id}-${rowIndex}-${cellIndex}`}
                       className={`${getClassName(

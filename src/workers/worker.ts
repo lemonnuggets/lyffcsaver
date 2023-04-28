@@ -1,15 +1,16 @@
-import {
+import type {
   ExtendedClass,
   ExtendedClassesByCourseID,
   Schedule,
   SlotMapping,
 } from "@/types";
 import { getCourseID } from "@/utils/generalUtils";
+import { expose } from "comlink";
 
 /// <reference lib="webworker" />
 
-export type Selection = { [courseID: string]: ExtendedClass };
-export type SlotCombinationToSelections = {
+type Selection = { [courseID: string]: ExtendedClass };
+type SlotCombinationToSelections = {
   [slotCombination: string]: Array<Selection>;
 };
 
@@ -371,3 +372,9 @@ export const populateSlotCombination = (
   possibleSlotCombinations[slotCombinationString] = newSchedules;
   return possibleSlotCombinations;
 };
+
+expose({
+  getSlotCombinations,
+  populateSlotCombination,
+  selectClasses,
+});

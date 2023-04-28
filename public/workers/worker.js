@@ -160,6 +160,10 @@ const getSlotCombinations = (
   }
   const courseID = courseIDs[0];
   const newCombinations = [];
+  console.log({
+    courseIDs,
+    classes,
+  });
   if (combinations.length === 0) {
     for (const currentClass of classes[courseID]) {
       if (
@@ -365,9 +369,11 @@ onmessage = (event) => {
       );
       event.ports[0].postMessage({ result: possibleClassSelections });
     } else {
+      console.log(event);
       throw "Invalid message";
     }
   } catch (e) {
+    console.log(e);
     event.ports[0].postMessage({ error: e });
   }
 };

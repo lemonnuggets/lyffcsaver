@@ -37,3 +37,6 @@ export type SchedulesBySlotCombination = {
   [slotCombination: string]: Array<Schedule>;
 };
 export type SlotMapping = { [slot: string]: Array<string> };
+export type SlotCombinationToSelections = {
+  [slotCombination: string]: Array<Selection>;
+};

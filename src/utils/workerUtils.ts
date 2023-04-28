@@ -4,6 +4,7 @@ import {
   ExtendedClassesByCourseID,
   Schedule,
   SchedulesBySlotCombination,
+  SlotCombinationToSelections,
   SlotMapping,
 } from "@/types";
 import timetableTemplateData from "./timetableTemplateData";
@@ -127,9 +128,85 @@ const verifyNumberOfClasses = (
 };
 
 const getWorkerInstance = () => {
-  return new ComlinkWorker<typeof import("../workers/workers")>(
-    new URL("./workers/workers", import.meta.url)
-  );
+  const worker = new Worker("./workers/worker.js", {
+    type: "module",
+  });
+  return {
+    populateSlotCombination: (
+      mapping: SlotMapping,
+      courseIDs: Array<string>,
+      classes: ExtendedClassesByCourseID,
+      slotCombinationString: string,
+      possibleSlotCombinations: SchedulesBySlotCombination
+    ) => {
+      return new Promise<SchedulesBySlotCombination>((resolve, reject) => {
+        const channel = new MessageChannel();
+        channel.port1.onmessage = ({ data }) => {
+          channel.port1.close();
+          if (data.error) {
+            reject(data.error);
+          } else {
+            resolve(data.result);
+          }
+        };
+        worker.postMessage(
+          [
+            "populateSlotCombination",
+            mapping,
+            courseIDs,
+            classes,
+            slotCombinationString,
+            possibleSlotCombinations,
+          ],
+          [channel.port2]
+        );
+      });
+    },
+    getSlotCombinations: (
+      mapping: SlotMapping,
+      courseIDs: Array<string>,
+      classes: ExtendedClassesByCourseID
+    ) => {
+      return new Promise<Array<Array<string>>>((resolve, reject) => {
+        const channel = new MessageChannel();
+        channel.port1.onmessage = ({ data }) => {
+          channel.port1.close();
+          if (data.error) {
+            reject(data.error);
+          } else {
+            resolve(data.result);
+          }
+        };
+        worker.postMessage(
+          ["getSlotCombinations", mapping, courseIDs, classes],
+          [channel.port2]
+        );
+      });
+    },
+    selectClasses: (
+      mapping: SlotMapping,
+      courseIDs: Array<string>,
+      classes: ExtendedClassesByCourseID
+    ) => {
+      return new Promise<SlotCombinationToSelections>((resolve, reject) => {
+        const channel = new MessageChannel();
+        channel.port1.onmessage = ({ data }) => {
+          channel.port1.close();
+          if (data.error) {
+            reject(data.error);
+          } else {
+            resolve(data.result);
+          }
+        };
+        worker.postMessage(
+          ["selectClasses", mapping, courseIDs, classes],
+          [channel.port2]
+        );
+      });
+    },
+  };
+  // const ComlinkWorker = wrap<typeof import("../workers/worker.ts")>(worker);
+  // return ComlinkWorker;
 };
 
 export const populateSlotCombination = async (
@@ -154,13 +231,16 @@ export const populateSlotCombination = async (
 
   console.time("populateSlotCombination");
   const populatedSlotCombination = await workerInstance.populateSlotCombination(
+    mapping,
     courseIDs,
     classes,
     slotsString,
-    mapping,
     objectToPopulate
   );
   console.timeEnd("populateSlotCombination");
+  console.log({
+    populatedSlotCombination,
+  });
   return populatedSlotCombination;
 };
 
@@ -207,10 +287,13 @@ export const getSlotCombinations = async (
 
   console.time("getSlotCombinations");
   const possibleSlotCombinations = await workerInstance.getSlotCombinations(
+    mapping,
     courseIDs,
-    classes,
-    mapping
+    classes
   );
+  console.log({
+    possibleSlotCombinations,
+  });
   const possibleSlotCombinationsObject: {
     [slotCombination: string]: Array<Schedule>;
   } = {};
@@ -252,16 +335,16 @@ export const getTimetables = async (
 
   console.time("getSlotCombinations");
   const possibleSlotCombinations = await workerInstance.getSlotCombinations(
+    mapping,
     courseIDs,
-    classes,
-    mapping
+    classes
   );
   console.timeEnd("getSlotCombinations");
   console.time("selectClasses");
   const possibleClassSelections = await workerInstance.selectClasses(
+    mapping,
     courseIDs,
-    classes,
-    mapping
+    classes
   );
   console.timeEnd("selectClasses");
 
@@ -323,10 +406,11 @@ export const getTimetables = async (
   console.time("populatedSlotCombination");
   const populatedSlotCombinationsObject =
     await workerInstance.populateSlotCombination(
+      mapping,
       courseIDs,
       classes,
       possibleSlotCombinationStrings[0],
-      mapping
+      {}
     );
   console.log(
     "Actual Schedules",

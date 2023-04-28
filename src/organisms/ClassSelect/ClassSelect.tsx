@@ -222,11 +222,14 @@ const ClassSelect = () => {
                   <div className={styles.erpId}>{classData["ERP ID"]}</div>
                   <div className={styles.classSlots}>
                     {classData["SLOT"]?.split("+").map((slot, index) => (
-                      <>
+                      <span
+                        className={styles.classSlot}
+                        key={`${slot}-class-slot`}
+                      >
                         {index !== 0 ? "+" : ""}
                         {slot}
                         <wbr />
-                      </>
+                      </span>
                     ))}
                   </div>
                 </div>

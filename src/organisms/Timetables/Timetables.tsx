@@ -177,8 +177,8 @@ const Timetables = () => {
             />
           </div>
           <Classes
-            schedules={schedules[slots.join("+")]}
-            slots={slots}
+            // schedules={schedules[slots.join("+")]}
+            // slots={slots}
             currentSchedule={schedule}
             setCurrentSchedule={setSchedule}
             setHoveredSlots={setHoveredSlots}

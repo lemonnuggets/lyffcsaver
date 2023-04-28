@@ -5,11 +5,13 @@ import { createSlice } from "@reduxjs/toolkit";
 export interface SchedulesState {
   schedules: SchedulesBySlotCombination;
   selectedSlotCombination: Array<string>;
+  currentSchedule: Schedule;
 }
 
 const initialState: SchedulesState = {
   schedules: {},
   selectedSlotCombination: [],
+  currentSchedule: {},
 };
 
 export const schedulesSlice = createSlice({
@@ -33,8 +35,9 @@ export const schedulesSlice = createSlice({
       }>
     ) => {
       const { slotCombination, schedulesArray } = action.payload;
-      state.schedules[slotCombination.join(",")] = schedulesArray;
+      state.schedules[slotCombination.join("+")] = schedulesArray;
       state.selectedSlotCombination = slotCombination;
+      state.schedules = { ...state.schedules };
     },
     deselectSlotCombination: (state) => {
       state.selectedSlotCombination = [];

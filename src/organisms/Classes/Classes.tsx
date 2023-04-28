@@ -1,3 +1,4 @@
+import { useAppSelector } from "@/app/hooks";
 import leftArrow from "@/assets/leftArrow.svg";
 import rightArrow from "@/assets/rightArrow.svg";
 import {
@@ -13,35 +14,61 @@ import ClassTable from "../ClassTable";
 import styles from "./Classes.module.css";
 
 type Props = {
-  schedules: Array<Schedule>;
-  slots: Array<string>;
+  // schedules: Array<Schedule>;
+  // slots: Array<string>;
   currentSchedule: Schedule;
   setCurrentSchedule: React.Dispatch<React.SetStateAction<Schedule>>;
   setHoveredSlots: React.Dispatch<React.SetStateAction<Array<string>>>;
   getScore: (courseID: string, classData: Class) => number;
 };
+const PREVIEWS_PER_PAGE = 1;
 
+const getScheduleScore = (
+  schedule: Schedule,
+  getScore: (courseID: string, classData: Class) => number
+) => {
+  let score = 0;
+  Object.keys(schedule).forEach(
+    (courseID) => (score += getScore(courseID, schedule[courseID]))
+  );
+  return score;
+};
 const Classes = ({
-  schedules,
-  slots,
+  // schedules,
+  // slots,
   currentSchedule,
   setCurrentSchedule,
   setHoveredSlots,
   getScore,
 }: Props) => {
-  const courseIDs = schedules?.length > 0 ? Object.keys(schedules[0]) : [];
-  const previewsPerPage = 1;
-  const pageCount = courseIDs?.length / previewsPerPage;
+  const { schedules, slots, courseIDs, pageCount } = useAppSelector((state) => {
+    const slots = state.schedules.selectedSlotCombination;
+    const schedules = state.schedules.schedules[slots.join("+")];
+    // schedules?.sort(
+    //   (a, b) => getScheduleScore(b, getScore) - getScheduleScore(a, getScore)
+    // );
+    const courseIDs = schedules?.length > 0 ? Object.keys(schedules[0]) : [];
+    const pageCount = courseIDs?.length / PREVIEWS_PER_PAGE;
+    return {
+      schedules,
+      slots,
+      courseIDs,
+      pageCount,
+    };
+  });
+  console.log(
+    "rerendering Classes(",
+    schedules,
+    slots,
+    currentSchedule,
+    setCurrentSchedule,
+    setHoveredSlots,
+    getScore,
+    ")"
+  );
   const [currentPage, setCurrentPage] = useState(1);
 
-  const getScheduleScore = (schedule: Schedule) => {
-    let score = 0;
-    Object.keys(schedule).forEach(
-      (courseID) => (score += getScore(courseID, schedule[courseID]))
-    );
-    return score;
-  };
-  schedules?.sort((a, b) => getScheduleScore(b) - getScheduleScore(a));
+  console.log("sorting schedules", schedules);
 
   useEffect(() => {
     setCurrentPage(0);
@@ -49,10 +76,15 @@ const Classes = ({
 
   useEffect(() => {
     const newSelectedClasses: Schedule = {};
+    console.log({
+      schedules,
+      courseIDs,
+    });
     if (schedules !== undefined && schedules.length > 0)
       for (const courseID of Object.keys(schedules[0])) {
         newSelectedClasses[courseID] = schedules[0][courseID];
       }
+    console.log("setting current schedule to", newSelectedClasses);
     setCurrentSchedule(newSelectedClasses);
   }, [slots, schedules]);
 
@@ -89,7 +121,10 @@ const Classes = ({
   );
   courseIDs.sort((a, b) => classes[b].length - classes[a].length);
   const currentPageData = courseIDs
-    ?.slice(currentPage * previewsPerPage, (currentPage + 1) * previewsPerPage)
+    ?.slice(
+      currentPage * PREVIEWS_PER_PAGE,
+      (currentPage + 1) * PREVIEWS_PER_PAGE
+    )
     ?.map((courseID) => {
       return (
         <ClassTable
@@ -125,6 +160,7 @@ const Classes = ({
               } else {
                 delete newSelectedClasses[currentCourseID];
               }
+              console.log("setting current schedule to", newSelectedClasses);
               return newSelectedClasses;
             });
           }}
@@ -142,9 +178,7 @@ const Classes = ({
     });
   const leftArrowNode = <img src={leftArrow} alt="<" />;
   const rightArrowNode = <img src={rightArrow} alt=">" />;
-  return schedules === undefined || schedules.length <= 0 ? (
-    <></>
-  ) : (
+  return schedules === undefined || schedules.length <= 0 ? null : (
     <div className={styles.panel} id="classes">
       <ReactPaginate
         previousLabel={leftArrowNode}
