@@ -1,0 +1,18 @@
+.bubble {
+  padding: 3px 10px;
+  background: var(--orange);
+}
+.reserved {
+  background: var(--red) !important;
+}
+a.bubble {
+  text-align: center;
+  cursor: pointer;
+  color: var(--black);
+  text-decoration: none;
+}
+
+a.bubble:hover {
+  color: var(--black);
+  background: var(--orange-faded);
+}

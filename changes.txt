@@ -1,0 +1,5 @@
+- node 18.8.0 instead of 16.13.1
+- pnpm instead of yarn
+- typescript instead of javascript
+- directory structure - using pages, atoms, molecules etc.
+- redux toolkit
